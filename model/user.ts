@@ -30,17 +30,17 @@ export type UserUpdate = Updateable<UserTable>
 
 
 
-export async function findPersonById(id: number) {
+export async function findUserById(id: number) {
     return await db.selectFrom('users')
         .where('id', '=', id)
         .selectAll()
-        .executeTakeFirst()
+        .executeTakeFirstOrThrow()
 }
 export async function findUserByEmail(email: string) {
     return await db.selectFrom('users')
         .where('email', '=', email.trim())
         .selectAll()
-        .executeTakeFirst()
+        .executeTakeFirstOrThrow()
 }
 
 export async function findPeople(criteria: Partial<User>) {
@@ -75,6 +75,9 @@ export async function findPeople(criteria: Partial<User>) {
 
 export async function doUpdatePerson(id: number, updateWith: UserUpdate) {
     await db.updateTable('users').set(updateWith).where('id', '=', id).execute()
+}
+export async function doUpdateUserByEmail(email: string, user: UserUpdate) {
+    return await db.updateTable('users').set(user).where('email', '=', email).executeTakeFirstOrThrow()
 }
 
 export async function doUserInsert(user: UserInsert) {

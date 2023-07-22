@@ -11,7 +11,7 @@ export async function checkAuth(req: NextRequest): Promise<boolean> {
     }
     const geo = `${req.geo?.country || ''}/${req.geo?.region || ''}/${req.geo?.country || ''}`
     console.info(geo)
-    const {rowCount} = await sql`UPDATE tokens SET last_active_at = NOW() where user_id = ${parseInt(uid)} AND token = ${token.trim()}`;
+    const {rowCount} = await sql`UPDATE tokens SET last_active_at = NOW() where user_id = ${parseInt(uid)} AND token = ${token.trim()}`;//todo:: change to kysely
     return rowCount >= 1;
 
 }

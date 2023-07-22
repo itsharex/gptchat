@@ -39,3 +39,9 @@ export async function doTokenInsert(token: TokenInsert) {
         .returningAll()
         .executeTakeFirstOrThrow()
 }
+export async function findTokenById(id: number) {
+    return await db.selectFrom('tokens')
+        .where('id', '=', id)
+        .selectAll()
+        .executeTakeFirstOrThrow()
+}

@@ -1,5 +1,4 @@
 import {NextResponse, NextRequest} from "next/server";
-import {sql} from "@vercel/postgres";
 import {jsonData} from "@/app/api/check-auth";
 import {sqlPagination} from "@/model/pagination";
 
