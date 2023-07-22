@@ -1,8 +1,9 @@
 'use server'
 
-import {bcryptPasswordCheck, getUUID} from "@/pkg/bcrypt";
-import {sql} from "@vercel/postgres";
+import {bcryptPasswordCheck} from "@/pkg/bcrypt";
 import {cookies} from "next/headers";
+import {findUserByEmail} from "@/model/user";
+import {doTokenInsert, TokenInsert} from "@/model/token";
 
 const tokenExpireSecond = 60 * 60 * 24 * 30;
 
@@ -18,19 +19,19 @@ export async function doUserLogin(formData: FormData): Promise<object> {
     const email = emailF as string;
     const password = passwordF as string;
     const token = crypto.randomUUID();
-    const {
-        rows,
-        rowCount
-    } = await sql`UPDATE users SET last_active_at = NOW() WHERE email = ${email.trim()} RETURNING *`;
-    if (rowCount !== 1) {
+
+    const user = await findUserByEmail(email);
+    if (!user) {
         throw new Error('User not found')
     }
-    const user = rows[0];
-    if (!bcryptPasswordCheck(password.trim(), user.password)) {
+    if (user && !bcryptPasswordCheck(password.trim(), user.password)) {
         throw new Error('Password is incorrect')
     }
 
-    await sql`INSERT INTO tokens (user_id, token, last_active_at,created_at) VALUES (${user.id}, ${token}, NOW(), NOW());`
+    const t = await doTokenInsert({
+        user_id: user.id,
+        token,
+    } as TokenInsert)
 
     //expire in 1 day
     cookies().set('token', token, {
@@ -40,11 +41,11 @@ export async function doUserLogin(formData: FormData): Promise<object> {
         sameSite: 'strict',
         secure: process.env.NODE_ENV === 'production',
     });
-    cookies().set('uid', user.id, {
+    cookies().set('uid', user.id.toString(), {
         maxAge: tokenExpireSecond,
         path: '/',
         httpOnly: true,
     })
-    user.password = undefined;
+    user.password = "";
     return user;
 }

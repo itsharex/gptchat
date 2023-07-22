@@ -1,11 +1,10 @@
 'use server'
 
 import {bcryptPasswordHash} from "@/pkg/bcrypt";
-import {sql} from "@vercel/postgres";
-import {sendMail} from "@/pkg/mail";
+import {UserInsert, doUserInsert, findUserByEmail} from "@/model/user";
 
 
-export async function doUserRegister(formData: FormData): Promise<boolean> {
+export async function doUserRegister(formData: FormData) {
     const username = formData.get('username') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -16,15 +15,17 @@ export async function doUserRegister(formData: FormData): Promise<boolean> {
     //todo:: handle duplicate error
     let hashedPassword = password && bcryptPasswordHash(password as string);
 
-    const userEmail = await sql`SELECT email FROM users WHERE email = ${email}`;
-    if(userEmail.rowCount > 0){
-        throw new Error('Email already exists')
-    }
-    const res = await sql`INSERT INTO users (username, email, password) VALUES (${username}, ${email}, ${hashedPassword})`;
-    if (res.rowCount > 0) {
-        await sendMail(email, "Welcome to MojoAI", `Hi ${username},\n welcome to ai.mojotv.cn. Thanks for registering. \n https://ai.mojotv.cn/login`);
-        return true
-    } else {
-        throw new Error('Register failed')
-    }
+    await findUserByEmail(email).then((user) => {
+        if (user) {
+            throw new Error('Email already exists')
+        }
+    })
+
+    const newUser: UserInsert = {
+        username,
+        email,
+        password: hashedPassword,
+    };
+    return await doUserInsert(newUser);
+
 }

@@ -15,7 +15,7 @@ export default function Register() {
     const doAction = async (formData: FormData) => startTransition(() => {
         doUserRegister(formData).then(res => {
             if (res) {
-                showToast('注册成功')
+                showToast('注册成功 '+res.email)
                 setTimeout(() => {
                     router.push('/login')
                 }, 50)

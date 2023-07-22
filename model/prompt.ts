@@ -1,7 +1,7 @@
 import {Generated, ColumnType} from 'kysely';
 
 export interface PromptTable {
-    id: Generated<number>;
+    id: Generated<number>
     remark: string
     prompt_format: string
     mode: 'public' | 'private'
