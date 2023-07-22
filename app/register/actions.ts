@@ -16,6 +16,10 @@ export async function doUserRegister(formData: FormData): Promise<boolean> {
     //todo:: handle duplicate error
     let hashedPassword = password && bcryptPasswordHash(password as string);
 
+    const userEmail = await sql`SELECT email FROM users WHERE email = ${email}`;
+    if(userEmail.rowCount > 0){
+        throw new Error('Email already exists')
+    }
     const res = await sql`INSERT INTO users (username, email, password) VALUES (${username}, ${email}, ${hashedPassword})`;
     if (res.rowCount > 0) {
         await sendMail(email, "Welcome to MojoAI", `Hi ${username},\n welcome to ai.mojotv.cn. Thanks for registering. \n https://ai.mojotv.cn/login`);
