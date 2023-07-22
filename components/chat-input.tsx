@@ -118,8 +118,15 @@ const ChatInput = () => {
         upsertMessage(newMsg, selectedSessionId);
         setLastUserInput(userInput)
         setUserInput("");
-        const eMsg = await doCallOpenAiCompletion(user.username, selectedSessionId);
-        eMsg && showToast(eMsg)
+        try {
+            await doCallOpenAiCompletion(user.username, selectedSessionId);
+        }catch (e) {
+            //redirect to login
+            // @ts-ignore
+            showToast(e.message)
+            //redirect to login page
+            window.location.href = '/login'
+        }
     };
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const vv = e.target.value;

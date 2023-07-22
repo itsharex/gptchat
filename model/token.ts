@@ -45,3 +45,16 @@ export async function findTokenById(id: number) {
         .selectAll()
         .executeTakeFirstOrThrow()
 }
+
+export async function findTokenByIdToken(id: number,token:string) {
+    return await db.selectFrom('tokens')
+        .where('id', '=', id)
+        .where('token', '=', token.trim())
+        .selectAll()
+        .executeTakeFirst()
+}
+export async function deleteTokenByIdToken(token:string) {
+    return await db.deleteFrom('tokens').where('token', '=', token.trim())
+        .returningAll()
+        .execute()
+}

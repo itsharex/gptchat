@@ -270,6 +270,9 @@ export const useChatStore = create<ChatState>()(persist(
                 msgObj.isTyping = false;
                 msgObj.streaming = false;
                 get().upsertMessage(msgObj, selectedSessionId);
+                if (eMsg){
+                    throw new Error(eMsg);
+                }
                 return eMsg;
             }
 

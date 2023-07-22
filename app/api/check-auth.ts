@@ -1,6 +1,6 @@
 import {cookies} from "next/headers";
-import {sql} from "@vercel/postgres";
 import {NextRequest, NextResponse} from "next/server";
+import {findTokenByIdToken} from "@/model/token";
 
 
 export async function checkAuth(req: NextRequest): Promise<boolean> {
@@ -9,10 +9,11 @@ export async function checkAuth(req: NextRequest): Promise<boolean> {
     if (!token || !uid) {
         return false
     }
-    const geo = `${req.geo?.country || ''}/${req.geo?.region || ''}/${req.geo?.country || ''}`
-    console.info(geo)
-    const {rowCount} = await sql`UPDATE tokens SET last_active_at = NOW() where user_id = ${parseInt(uid)} AND token = ${token.trim()}`;//todo:: change to kysely
-    return rowCount >= 1;
+    const res = await findTokenByIdToken(parseInt(uid), token)
+    if (!res) {
+        return false
+    }
+    return true;
 
 }
 

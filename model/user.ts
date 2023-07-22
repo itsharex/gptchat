@@ -87,7 +87,7 @@ export async function doUserInsert(user: UserInsert) {
         .executeTakeFirstOrThrow()
 }
 
-export async function deletePerson(id: number) {
+export async function deleteUser(id: number) {
     return await db.deleteFrom('users').where('id', '=', id)
         .returningAll()
         .executeTakeFirst()
